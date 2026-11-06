@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: stg_manila_daily
+    description: "Cleaned and standardized daily weather records for Manila stored in S3 Silver."
+    columns:
+      - name: record_date
+        tests:
+          - unique
+          - not_null
+      - name: max_temp_celsius
+        tests:
+          - not_null
+      - name: min_temp_celsius
+        tests:
+          - not_null
+      - name: precipitation_mm
+        tests:
+          - not_null
+
+  - name: fct_monthly_weather_summary
+    description: "Aggregated monthly weather metrics stored in S3 Gold."
+    columns:
+      - name: month_start_date
+        tests:
+          - unique
+          - not_null
+      - name: total_days_recorded
+        tests:
+          - not_null

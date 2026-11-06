@@ -1,0 +1,26 @@
+
+# Secrets & Credentials
+.dlt/secrets.toml
+.streamlit/secrets.toml
+.env
+aws_credentials
+
+# DuckDB Local Storage
+*.duckdb
+*.duckdb.wal
+
+# Python & Airflow Artifacts
+__pycache__/
+*.pyc
+logs/
+airflow/logs/
+weather_transform/logs/
+weather_transform/target/
+weather_transform/dbt_packages/
+
+# Virtual Environments & IDEs
+venv/
+.venv/
+.vscode/
+.idea/
+EOF
