@@ -28,3 +28,4 @@ select
 from silver_daily
 group by 1
 order by month_start_date asc
+
