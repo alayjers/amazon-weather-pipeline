@@ -1,15 +1,27 @@
+import streamlit as st
+import duckdb
+import plotly.graph_objects as go
+import pandas as pd
+
+# Page setup
+st.set_page_config(
+    page_title="Manila Weather Analytics Lakehouse",
+    page_icon="🌤️",
+    layout="wide"
+)
+
+st.title("🌤️ Manila Weather Summary Dashboard")
+st.markdown("Gold Layer Analytics direct from `s3://weather-datalake-dev/gold/fct_monthly_weather_summary.parquet`")
+
 @st.cache_data(ttl=3600)
 def load_gold_data() -> pd.DataFrame:
-    """Connects to DuckDB httpfs using Streamlit secrets to query S3 Gold layer."""
     con = duckdb.connect()
     con.execute("INSTALL httpfs; LOAD httpfs;")
     
-    # Extract credentials from Streamlit secrets
     key_id = st.secrets["aws"]["aws_access_key_id"]
     secret_key = st.secrets["aws"]["aws_secret_access_key"]
     region = st.secrets["aws"]["aws_default_region"]
     
-    # Configure explicit S3 secret in DuckDB
     con.execute(f"""
         CREATE SECRET (
             TYPE S3,
