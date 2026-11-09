@@ -1,11 +1,14 @@
+name: amazon-weather-pipeline
+
 version: '3.8'
 
 services:
   airflow:
     build: .
-    container_name: weather_airflow
+    # Removed container_name to prevent future naming conflicts
+    restart: "no"
     ports:
-      - "8080:8080"
+      - "8081:8080"
     environment:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
       - AIRFLOW__CORE__LOAD_EXAMPLES=False

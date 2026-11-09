@@ -1,37 +1,42 @@
+from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.bash import BashOperator
-from datetime import datetime, timedelta
 
-# Default settings for the workflow
+# Default arguments applied to all tasks
 default_args = {
-    'owner': 'Elijah',
+    'owner': 'elijah',
     'depends_on_past': False,
-    'start_date': datetime(2024, 1, 1),
+    'start_date': datetime(2026, 11, 1),
+    'email_on_failure': False,
+    'email_on_retry': False,
     'retries': 1,
-    'retry_delay': timedelta(minutes=3),
+    'retry_delay': timedelta(minutes=5),
 }
 
-# Define the DAG
 with DAG(
-    'amazon_weather_lakehouse',
+    dag_id='weather_pipeline_production',
     default_args=default_args,
-    description='Automated dlt ingestion and dbt build for S3 Lakehouse',
-    schedule_interval='0 2 * * *', # Runs automatically every day at 2:00 AM
+    description='Automated production ingestion from Open-Meteo API to S3 and dbt transformation',
+    schedule_interval='0 2 * * *',  # Runs daily at 02:00 UTC
     catchup=False,
-    tags=['weather', 'aws', 'duckdb'],
+    max_active_runs=1,
+    tags=['production', 'weather', 'dbt'],
 ) as dag:
 
-    # Task 1: Run the dlt ingestion script
-    ingest_bronze = BashOperator(
-        task_id='ingest_openmeteo_to_s3_bronze',
-        bash_command='python3 /opt/airflow/project/ingest.py',
+    # Task 1: Ingest dynamic weather data into S3 prod_bronze
+    ingest_production_data = BashOperator(
+        task_id='ingest_production_data',
+        bash_command='PIPELINE_ENV=prod python3 /opt/airflow/project/ingest.py',
     )
 
-    # Task 2: Run dbt build (compiles, runs models, and executes tests in one session)
-    transform_and_test = BashOperator(
-        task_id='dbt_build_silver_and_gold',
-        bash_command='cd /opt/airflow/project/weather_transform && dbt build',
+    # Task 2: Transform raw records into S3 prod_silver and prod_gold via dbt
+    dbt_prod_build = BashOperator(
+        task_id='dbt_prod_build',
+        bash_command=(
+            'cd /opt/airflow/project/weather_transform && '
+            'dbt build --target prod --profiles-dir /home/airflow/.dbt'
+        ),
     )
 
-    # Set the execution order
-    ingest_bronze >> transform_and_test
+    # Define task execution order
+    ingest_production_data >> dbt_prod_build
