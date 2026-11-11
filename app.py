@@ -14,13 +14,21 @@ def load_lakehouse_data():
     con.execute("INSTALL httpfs; LOAD httpfs; INSTALL aws; LOAD aws;")
     con.execute("CREATE SECRET (TYPE S3, PROVIDER credential_chain);")
     
-    # Read Historical (Silver)
-    hist_df = con.execute("""
-        SELECT time::TIMESTAMP as date, max_temp_celsius as temp, 'Historical' as category 
-        FROM read_parquet('s3://weather-datalake-dev/silver/stg_manila_daily.parquet')
-    """).df()
+    # 1. Read Historical (Silver) using SELECT * to bypass column name mismatches
+    hist_raw = con.execute("SELECT * FROM read_parquet('s3://weather-datalake-dev/silver/stg_manila_daily.parquet')").df()
     
-    # Read Forecast (Gold)
+    # Dynamically map the columns (just like in train_model.py)
+    date_col = 'time' if 'time' in hist_raw.columns else 'date' if 'date' in hist_raw.columns else hist_raw.columns[0]
+    temp_col = 'max_temp_celsius' if 'max_temp_celsius' in hist_raw.columns else 'temperature_2m_max'
+    
+    # Standardize names for the dashboard
+    hist_df = pd.DataFrame({
+        'date': pd.to_datetime(hist_raw[date_col]),
+        'temp': hist_raw[temp_col],
+        'category': 'Historical'
+    })
+    
+    # 2. Read Forecast (Gold) - XGBoost script specifically set these exact names
     fct_df = con.execute("""
         SELECT forecast_date::TIMESTAMP as date, predicted_max_temp_celsius as temp, 'XGBoost Forecast' as category 
         FROM read_parquet('s3://weather-datalake-dev/gold/fct_ml_forecast.parquet')
