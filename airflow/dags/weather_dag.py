@@ -38,5 +38,11 @@ with DAG(
         ),
     )
 
+    # Task 3: Train XGBoost Model and Export Forecast to Gold
+    train_ml_model = BashOperator(
+        task_id='train_ml_model',
+        bash_command='python3 /opt/airflow/project/train_model.py',
+    )
+
     # Define task execution order
-    ingest_production_data >> dbt_prod_build
+    ingest_production_data >> dbt_prod_build >> train_ml_model
