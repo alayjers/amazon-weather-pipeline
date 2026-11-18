@@ -1,30 +1,82 @@
 version: 2
 
 models:
-  - name: stg_manila_daily
-    description: "Cleaned and standardized daily weather records for Manila stored in S3 Silver."
+  - name: stg_locations
     columns:
-      - name: record_date
+      - name: city_key
         tests:
           - unique
           - not_null
-      - name: max_temp_celsius
+
+  - name: stg_current_weather
+    columns:
+      - name: city_key
         tests:
           - not_null
-      - name: min_temp_celsius
+      - name: observed_dt
         tests:
           - not_null
-      - name: precipitation_mm
+      - name: temp_celsius
         tests:
           - not_null
 
-  - name: fct_monthly_weather_summary
-    description: "Aggregated monthly weather metrics stored in S3 Gold."
+  - name: stg_weather_forecast_3h
     columns:
-      - name: month_start_date
+      - name: city_key
+        tests:
+          - not_null
+      - name: forecast_dt
+        tests:
+          - not_null
+      - name: temp_celsius
+        tests:
+          - not_null
+
+  - name: stg_air_pollution
+    columns:
+      - name: city_key
+        tests:
+          - not_null
+      - name: observed_dt
+        tests:
+          - not_null
+      - name: aqi_score
+        tests:
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
+
+  - name: dim_location
+    columns:
+      - name: city_key
         tests:
           - unique
           - not_null
-      - name: total_days_recorded
+
+  - name: fct_city_current_conditions
+    columns:
+      - name: city_key
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_location')
+              field: city_key
+      - name: heat_advisory_level
+        tests:
+          - accepted_values:
+              values: ['Not Hazardous', 'Caution', 'Extreme Caution', 'Danger', 'Extreme Danger']
+      - name: aqi_label
+        tests:
+          - accepted_values:
+              values: ['Good', 'Fair', 'Moderate', 'Poor', 'Very Poor']
+
+  - name: fct_city_forecast_3h
+    columns:
+      - name: city_key
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_location')
+              field: city_key
+      - name: forecast_time_local
         tests:
           - not_null

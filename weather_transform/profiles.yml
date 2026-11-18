@@ -1,0 +1,25 @@
+weather_transform:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ':memory:'
+      extensions:
+        - httpfs
+        - aws
+      settings:
+        s3_region: 'ap-southeast-2'
+      secrets:
+        - type: s3
+          provider: credential_chain
+    prod:
+      type: duckdb
+      path: ':memory:'
+      extensions:
+        - httpfs
+        - aws
+      settings:
+        s3_region: 'ap-southeast-2'
+      secrets:
+        - type: s3
+          provider: credential_chain

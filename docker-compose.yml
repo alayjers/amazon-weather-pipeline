@@ -12,6 +12,7 @@ services:
     environment:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - .:/opt/airflow/project
