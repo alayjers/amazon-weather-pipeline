@@ -5,10 +5,16 @@ import pandas as pd
 st.set_page_config(page_title="APAC Weather Intelligence", page_icon="🌏", layout="wide")
 
 st.title("🌏 APAC Multi-City Weather & Environmental Intelligence")
-st.caption("Medallion Lakehouse (OpenWeather → dlt → S3 Parquet → dbt Star Schema → DuckDB)")
+col_cap, col_btn = st.columns([5, 1])
+with col_cap:
+    st.caption("Medallion Lakehouse (OpenWeather → dlt → S3 Parquet → dbt Star Schema → DuckDB)")
+with col_btn:
+    if st.button("🔄 Refresh Data", use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
 
 
-@st.cache_data(ttl=900)
+@st.cache_data(ttl=300)
 def load_gold_marts():
     con = duckdb.connect(database=":memory:")
     con.execute("INSTALL httpfs; LOAD httpfs; INSTALL aws; LOAD aws;")
