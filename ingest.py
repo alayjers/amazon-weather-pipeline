@@ -212,10 +212,12 @@ def openweather_apac_source():
 
 
 if __name__ == "__main__":
-    env = os.getenv("PIPELINE_ENV", "prod")
+    env = os.getenv("PIPELINE_ENV", "dev")
+    bucket_url = os.getenv("DESTINATION__FILESYSTEM__BUCKET_URL", "s3://weather-datalake-dev")
+
     pipeline = dlt.pipeline(
         pipeline_name=f"openweather_apac_{env}",
-        destination="filesystem",
+        destination=dlt.destinations.filesystem(bucket_url=bucket_url),
         dataset_name=f"{env}_bronze",
     )
     load_info = pipeline.run(openweather_apac_source(), loader_file_format="parquet")
