@@ -1,5 +1,4 @@
 # Secrets & Credentials
-.dlt/secrets.toml
 .streamlit/secrets.toml
 .env
 aws_credentials
@@ -22,3 +21,4 @@ venv/
 .venv/
 .vscode/
 .idea/
+.dlt/secrets.toml

@@ -2,14 +2,15 @@ name: Scheduled APAC Weather Pipeline
 
 on:
   schedule:
-    - cron: '0 */3 * * *'  # Runs every 3 hours UTC automatically
-  workflow_dispatch:       # Lets you trigger a manual run anytime from GitHub UI
+    - cron: '0 */3 * * *'
+  workflow_dispatch:
 
 jobs:
   run-etl:
     runs-on: ubuntu-latest
     env:
       PIPELINE_ENV: prod
+      DESTINATION__FILESYSTEM__BUCKET_URL: s3://weather-datalake-dev
       OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
